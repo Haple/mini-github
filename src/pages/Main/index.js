@@ -43,6 +43,15 @@ export default class Main extends Component {
     this.setState({ loading: true, error: '' });
     try {
       const { newRepo, repositories } = this.state;
+
+      /**
+       * Check if repository was already added
+       */
+      const repoAlreadyExists = repositories.find(
+        repository => repository.name.toLowerCase() === newRepo.toLowerCase()
+      );
+      if (repoAlreadyExists) throw new Error('Repositório duplicado');
+
       const response = await api.get(`/repos/${newRepo}`);
       const data = {
         name: response.data.full_name,
@@ -83,8 +92,8 @@ export default class Main extends Component {
             {loading ? (
               <FaSpinner color="#FFF" size={14} />
             ) : (
-              <FaPlus color="#FFF" size={14} />
-            )}
+                <FaPlus color="#FFF" size={14} />
+              )}
           </SubmitButton>
         </Form>
 
