@@ -122,3 +122,21 @@ export const IssueList = styled.ul`
     }
   }
 `;
+
+export const PaginationControl = styled.form`
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+
+  button {
+    background: none;
+    border: none;
+    color: #7159c1;
+    font-size: 18px;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+`;

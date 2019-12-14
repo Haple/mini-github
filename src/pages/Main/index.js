@@ -92,8 +92,8 @@ export default class Main extends Component {
             {loading ? (
               <FaSpinner color="#FFF" size={14} />
             ) : (
-                <FaPlus color="#FFF" size={14} />
-              )}
+              <FaPlus color="#FFF" size={14} />
+            )}
           </SubmitButton>
         </Form>
 
