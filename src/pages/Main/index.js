@@ -44,6 +44,8 @@ export default class Main extends Component {
     try {
       const { newRepo, repositories } = this.state;
 
+      if (newRepo === '') throw new Error('Indique um repositório');
+
       /**
        * Check if repository was already added
        */
@@ -59,14 +61,11 @@ export default class Main extends Component {
       this.setState({
         repositories: [...repositories, data],
         newRepo: '',
-        loading: false,
       });
     } catch (error) {
-      this.setState({
-        error,
-        newRepo: '',
-        loading: false,
-      });
+      this.setState({ error });
+    } finally {
+      this.setState({ loading: false });
     }
   };
 

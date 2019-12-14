@@ -42,23 +42,23 @@ export const Owner = styled.header`
   }
 `;
 
-export const Selection = styled.div`
-  flex: 1;
+export const IssueFilter = styled.div`
   display: flex;
-  flex-direction: row;
-  align-items: center;
   justify-content: center;
-  margin-top: 20px;
+  padding-bottom: 15px;
 
-  div {
-    margin: 0 10px;
-    display: flex;
-    align-items: center;
+  button {
+    color: #7159c1;
+    border-radius: 4px;
+    outline: 0;
+    border: 0;
+    padding: 8px;
+    margin: 0 0.25rem;
 
-    span {
-      color: #666;
-      font-size: 14px;
-      margin-right: 5px;
+    &:nth-child(${props => props.active + 1}) {
+      /* background: #576574; */
+      background: #7180c1;
+      color: white;
     }
   }
 `;
@@ -123,10 +123,12 @@ export const IssueList = styled.ul`
   }
 `;
 
-export const PaginationControl = styled.form`
+export const PageControls = styled.form`
   margin-top: 15px;
   display: flex;
   justify-content: space-between;
+  font-size: 12;
+  color: #999;
 
   button {
     background: none;
@@ -137,6 +139,10 @@ export const PaginationControl = styled.form`
     &:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+    }
+
+    &:hover {
+      opacity: 0.8;
     }
   }
 `;
