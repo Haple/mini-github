@@ -44,7 +44,7 @@ export default class Main extends Component {
     try {
       const { newRepo, repositories } = this.state;
 
-      if (newRepo === '') throw new Error('Indique um repositório');
+      if (newRepo.trim() === '') throw new Error('Indique um repositório');
 
       /**
        * Check if repository was already added

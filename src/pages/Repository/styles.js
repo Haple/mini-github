@@ -56,7 +56,6 @@ export const IssueFilter = styled.div`
     margin: 0 0.25rem;
 
     &:nth-child(${props => props.active + 1}) {
-      /* background: #576574; */
       background: #7180c1;
       color: white;
     }
