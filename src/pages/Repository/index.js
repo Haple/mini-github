@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import api from '../../services/api';
-import { Loading, Owner, IssueList } from './styles';
+import { Loading, Owner, IssueList, Selection } from './styles';
 import Container from '../../components/Container';
 
 export default class Repository extends Component {
@@ -11,30 +11,49 @@ export default class Repository extends Component {
     repository: {},
     issues: [],
     loading: true,
+    state: 'all',
   };
 
   async componentDidMount() {
     const { match } = this.props;
+    const { state } = this.state;
     const repoName = decodeURIComponent(match.params.repository);
 
+    await this.getRepository(repoName, state);
+  }
+
+  async getRepository(repoName, state) {
+    this.setState({
+      loading: true,
+    });
     const [repository, issues] = await Promise.all([
       api.get(`/repos/${repoName}`),
       api.get(`/repos/${repoName}/issues`, {
         params: {
-          state: 'open',
+          state,
           per_page: 5,
         },
       }),
     ]);
+
     this.setState({
+      state,
       repository: repository.data,
       issues: issues.data,
       loading: false,
     });
   }
 
+  handleOptionChange = async e => {
+    const {
+      repository: { full_name: fullName },
+    } = this.state;
+    const state = e.target.value;
+    await this.getRepository(fullName, state);
+  };
+
   render() {
-    const { repository, issues, loading } = this.state;
+    const { repository, issues, loading, state } = this.state;
 
     if (loading) {
       return <Loading>Carregando...</Loading>;
@@ -48,6 +67,39 @@ export default class Repository extends Component {
           <h1>{repository.name}</h1>
           <p>{repository.description}</p>
         </Owner>
+
+        <Selection>
+          <div>
+            <span>Tudo</span>
+            <input
+              type="radio"
+              name="state"
+              value="all"
+              onChange={this.handleOptionChange}
+              checked={state === 'all'}
+            />
+          </div>
+          <div>
+            <span>Aberto</span>
+            <input
+              type="radio"
+              name="state"
+              value="open"
+              onChange={this.handleOptionChange}
+              checked={state === 'open'}
+            />
+          </div>
+          <div>
+            <span>Fechado</span>
+            <input
+              type="radio"
+              name="state"
+              value="closed"
+              onChange={this.handleOptionChange}
+              checked={state === 'closed'}
+            />
+          </div>
+        </Selection>
 
         <IssueList>
           {issues.map(issue => (
