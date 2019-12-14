@@ -1,9 +1,16 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 
 import api from '../../services/api';
-import { Loading, Owner, IssueList } from './styles';
+import {
+  Loading,
+  Owner,
+  IssueList,
+  Selection,
+  PaginationControl,
+} from './styles';
 import Container from '../../components/Container';
 
 export default class Repository extends Component {
@@ -11,30 +18,88 @@ export default class Repository extends Component {
     repository: {},
     issues: [],
     loading: true,
+    state: 'all',
+    page: 1,
   };
 
   async componentDidMount() {
     const { match } = this.props;
+    const { state } = this.state;
     const repoName = decodeURIComponent(match.params.repository);
 
+    this.setState({
+      loading: true,
+    });
     const [repository, issues] = await Promise.all([
       api.get(`/repos/${repoName}`),
-      api.get(`/repos/${repoName}/issues`, {
-        params: {
-          state: 'open',
-          per_page: 5,
-        },
-      }),
+      this.getIssues(repoName, state),
     ]);
+
     this.setState({
+      state,
+      issues,
       repository: repository.data,
-      issues: issues.data,
       loading: false,
     });
   }
 
+  getIssues = async (repoName, state, page = 1) => {
+    const { data: issues } = await api.get(`/repos/${repoName}/issues`, {
+      params: {
+        state,
+        page,
+        per_page: 5,
+      },
+    });
+    return issues;
+  };
+
+  handleOptionChange = async e => {
+    const {
+      repository: { full_name: repoName },
+    } = this.state;
+    const state = e.target.value;
+    this.setState({
+      loading: true,
+    });
+    const issues = await this.getIssues(repoName, state);
+
+    this.setState({
+      issues,
+      state,
+      page: 1,
+      loading: false,
+    });
+  };
+
+  handlePreviousPage = async () => {
+    const {
+      page,
+      state,
+      repository: { full_name: fullName },
+    } = this.state;
+    const issues = await this.getIssues(fullName, state, page - 1);
+    this.setState({
+      issues,
+      page: page - 1,
+    });
+  };
+
+  handleNextPage = async () => {
+    const {
+      page,
+      state,
+      repository: { full_name: fullName },
+    } = this.state;
+    const issues = await this.getIssues(fullName, state, page + 1);
+    this.setState({
+      issues,
+      page: page + 1,
+    });
+  };
+
   render() {
-    const { repository, issues, loading } = this.state;
+    const { repository, issues, loading, state, page } = this.state;
 
     if (loading) {
       return <Loading>Carregando...</Loading>;
@@ -48,6 +113,39 @@ export default class Repository extends Component {
           <h1>{repository.name}</h1>
           <p>{repository.description}</p>
         </Owner>
+
+        <Selection>
+          <div>
+            <span>Tudo</span>
+            <input
+              type="radio"
+              name="state"
+              value="all"
+              onChange={this.handleOptionChange}
+              checked={state === 'all'}
+            />
+          </div>
+          <div>
+            <span>Aberto</span>
+            <input
+              type="radio"
+              name="state"
+              value="open"
+              onChange={this.handleOptionChange}
+              checked={state === 'open'}
+            />
+          </div>
+          <div>
+            <span>Fechado</span>
+            <input
+              type="radio"
+              name="state"
+              value="closed"
+              onChange={this.handleOptionChange}
+              checked={state === 'closed'}
+            />
+          </div>
+        </Selection>
 
         <IssueList>
           {issues.map(issue => (
@@ -71,6 +169,19 @@ export default class Repository extends Component {
             </li>
           ))}
         </IssueList>
+
+        <PaginationControl>
+          <button
+            disabled={page <= 1}
+            type="button"
+            onClick={this.handlePreviousPage}
+          >
+            <FaArrowLeft />
+          </button>
+          <button type="button" onClick={this.handleNextPage}>
+            <FaArrowRight />
+          </button>
+        </PaginationControl>
       </Container>
     );
   }
